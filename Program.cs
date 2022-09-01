@@ -1,4 +1,6 @@
 using HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseHttpMetrics(options=>
+{
+    options.RequestCount.Enabled = false;   
+});
+
 app.UseRouting();
 
 app.UseAuthorization();
@@ -29,9 +36,17 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHealthChecks("/health");
+    endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+    {
+        Predicate = _ => true,
+        ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
+
+    });
+    app.MapGet("/", () => "Hello, World");
+    endpoints.MapMetrics();
 });
 
 app.MapControllers();
 
 app.Run();
+

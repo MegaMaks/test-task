@@ -12,6 +12,6 @@ public class DatabaseHealthCheck : IHealthCheck
     }
     private Task<bool> IsDatabaseConnectionOkAsync()
     {
-        return Task.FromResult(false);
+        return Task.FromResult(DateTime.Now.Millisecond % 2 == 0);
     }
 }
